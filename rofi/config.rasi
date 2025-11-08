@@ -1,0 +1,118 @@
+// vim: fdm=marker
+configuration {
+  modes: "window,drun,run,ssh";
+  font: "JetBrainsMono NF 18";
+  drun-display-format: "{name}";
+}
+* {
+  // general - Catppuccin Mocha
+  bg: #1e1e2e;
+  bgt: #1e1e2e95;
+  t: transparent;
+  fg: #cdd6f4;
+  fg-dim: #bac2de;
+  surface0: #313244;
+  surface1: #45475a;
+  selected-bg: #89b4fa;  // Catppuccin blue for selection
+  selected-fg: #1e1e2e;
+  // for windows
+  active: #a6e3a1;
+  urgent: #f38ba8;
+  accent: #89b4fa;
+}
+window {
+  fullscreen: true;
+  padding: 35% 30%;       // you might want to ajust these to resize rofi.
+  transparency: "real";
+  background-color: @bgt;
+  border-color: @t;
+}
+listview {
+  border: 0 0 0 0;
+  padding: 23 0 0;
+  scrollbar: true;
+}
+scrollbar {
+    width:        4px;
+    border:       0;
+    handle-color: @accent;
+    handle-width: 8px;
+    padding:      0 5;
+}
+entry {
+    placeholder: "";
+}
+// less interesting stuff {{{
+// using elements from:
+// https://github.com/bardisty/gruvbox-rofi/blob/master/gruvbox-common.rasi
+textbox {
+    text-color: @fg;
+}
+element {
+    border:  0;
+    padding: 2px;
+}
+element.normal.normal {
+    background-color: @t;
+    text-color:       @fg;
+}
+element.normal.urgent {
+    background-color: @t;
+    text-color:       @urgent;
+}
+element.normal.active {
+    background-color: @t;
+    text-color:       @active;
+}
+element.selected.normal {
+    background-color: @selected-bg;
+    text-color:       @selected-fg;
+}
+element.selected.urgent {
+    background-color: @selected-bg;
+    text-color:       @urgent;
+}
+element.selected.active {
+    background-color: @selected-bg;
+    text-color:       @bg;
+}
+element.alternate.normal {
+    background-color: @t;
+    text-color:       @fg;
+}
+element.alternate.urgent {
+    background-color: @t;
+    text-color:       @urgent;
+}
+element.alternate.active {
+    background-color: @t;
+    text-color:       @active;
+}
+sidebar {
+    border:       2px 0 0;
+    border-color: @accent;
+}
+inputbar {
+    spacing:    0;
+    text-color: @fg;
+    padding:    2px;
+    children:   [ prompt, textbox-prompt-sep, entry, case-indicator ];
+}
+case-indicator,
+entry,
+prompt,
+button {
+    spacing:    0;
+    text-color: @fg;
+}
+button.selected {
+    background-color: @surface0;
+    text-color:       @accent;
+}
+textbox-prompt-sep {
+    expand:     false;
+    str:        ":";
+    text-color: @accent;
+    margin:     0 0.3em 0 0;
+}
+// }}}

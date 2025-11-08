@@ -1,0 +1,11 @@
+[manager]
+prepend_keymap = [
+  { on = [ "<C-t>" ], run = 'shell "$SHELL" --block', desc = "Open terminal in current directory" },
+  { on = [ "T" ], run = 'shell "$SHELL" --block', desc = "Open terminal in current directory" },
+]
+
+[keymap.manager]
+copy = ["yy"]
+cut = ["dd"]
+paste = ["pp"]
+delete = ["D"]

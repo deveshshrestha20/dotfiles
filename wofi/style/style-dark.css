@@ -1,0 +1,100 @@
+/* Wofi Minimalistic Theme - Catppuccin Mocha */
+
+* {
+  transition: all 0.15s ease;
+  font-family: "FiraCode Nerd Font Mono", monospace;
+  font-size: 13px;
+}
+
+/* Main window */
+window {
+  margin: 0;
+  padding: 0;
+  border: 1px solid #45475a;
+  background-color: #1e1e2e;
+  border-radius: 12px;
+}
+
+/* Search input */
+#input {
+  margin: 16px;
+  padding: 10px 16px;
+  border: none;
+  color: #cdd6f4;
+  font-weight: 500;
+  background-color: #313244;
+  outline: none;
+  border-radius: 8px;
+  caret-color: #89b4fa;
+}
+
+#input:focus {
+  background-color: #45475a;
+  border: none;
+  outline: none;
+}
+
+#input image {
+  color: #cdd6f4;
+}
+
+/* Inner container */
+#inner-box {
+  margin: 0 16px 16px 16px;
+  border: none;
+  background: transparent;
+}
+
+/* Outer container */
+#outer-box {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* Scrollbar area */
+#scroll {
+  margin: 0;
+  border: none;
+}
+
+/* Entry items */
+#entry {
+  margin: 2px 0;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 8px;
+  background-color: transparent;
+  color: #cdd6f4;
+  font-weight: 400;
+}
+
+#entry:hover {
+  background-color: #313244;
+}
+
+#entry:selected {
+  background-color: #89b4fa;
+  color: #1e1e2e;
+  outline: none;
+  border: none;
+}
+
+/* Entry icon */
+#img {
+  margin-right: 12px;
+  background: transparent;
+}
+
+/* Entry text */
+#text {
+  margin: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+}
+
+#text:selected {
+  color: #1e1e2e;
+}
