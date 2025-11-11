@@ -1,26 +1,26 @@
 #!/usr/bin/env zsh
-
 BROWSER="zen-browser"
 
-# Zen Browser profile directory
-ZEN_PROFILE="$HOME/.zen/6laop3je.Default (release)"
-BOOKMARKS_DB="$ZEN_PROFILE/places.sqlite"
+# Automatically find Zen Browser profile directory
+ZEN_BASE="$HOME/.zen"
 
-if [[ ! -f "$BOOKMARKS_DB" ]]; then
-    notify-send "Zen Bookmarks" "Bookmarks database not found" -u critical
+# Find the profile directory that contains places.sqlite
+ZEN_PROFILE=$(find "$ZEN_BASE" -maxdepth 2 -name "places.sqlite" -exec dirname {} \; | head -1)
+
+if [[ -z "$ZEN_PROFILE" ]]; then
+    notify-send "Zen Bookmarks" "Could not find Zen Browser profile directory" -u critical
+    echo "Error: Zen profile not found in $ZEN_BASE"
+    echo "Available directories:"
+    ls -la "$ZEN_BASE" 2>/dev/null || echo "~/.zen directory does not exist"
     exit 1
 fi
 
-#!/usr/bin/env zsh
-
-BROWSER="zen-browser"
-
-# Zen Browser profile directory
-ZEN_PROFILE="$HOME/.zen/6laop3je.Default (release)"
 BOOKMARKS_DB="$ZEN_PROFILE/places.sqlite"
 
 if [[ ! -f "$BOOKMARKS_DB" ]]; then
-    notify-send "Zen Bookmarks" "Bookmarks database not found" -u critical
+    notify-send "Zen Bookmarks" "Bookmarks database not found at: $BOOKMARKS_DB" -u critical
+    echo "Error: places.sqlite not found at $BOOKMARKS_DB"
+    echo "Profile directory: $ZEN_PROFILE"
     exit 1
 fi
 

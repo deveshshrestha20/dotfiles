@@ -1,31 +1,33 @@
-* {
-    border: none;
-    border-radius: 10px;
-    font-family: "JetBrainsMono Nerd Font";
-    font-weight: bold;
-    font-size: 12px;
-    min-height: 0;
-}
-
+/* -----------------------------
+   Waybar Global Styles
+   ----------------------------- */
 window#waybar {
     background: rgba(21, 18, 27, 0);
     color: #cdd6f4;
+    font-family: "JetBrainsMono Nerd Font";
+    font-weight: bold;
+    font-size: 1em; /* base size, can scale with monitors */
 }
 
+/* Tooltip styling */
 tooltip {
-    background: #000000;
-    border-radius: 7px;
-    border-width: 2.5px;
+    background: #1e1e2e;
+    border-radius: 0.625em; /* 10px -> em */
+    border-width: 0.125em;   /* 2px -> em */
     border-style: solid;
-    border-color: #8aadf4;
-    padding: 5px;
+    border-color: #89b4fa;
+    padding: 0.625em;        /* 10px -> em */
+    color: #cdd6f4;
 }
 
+/* -----------------------------
+   Workspaces
+   ----------------------------- */
 #workspaces button {
     color: #313244;
-    margin-right: 5px;
-    padding-right: 0px;
-    padding-left: 0px;
+    margin-right: 0.3125em; /* 5px -> em */
+    padding-left: 0;
+    padding-right: 0;
 }
 
 #workspaces button.active {
@@ -35,7 +37,7 @@ tooltip {
 #workspaces button.focused {
     color: #a6adc8;
     background: #eba0ac;
-    border-radius: 13px;
+    border-radius: 0.8125em; /* 13px -> em */
 }
 
 #workspaces button.persistent {
@@ -49,15 +51,19 @@ tooltip {
 #workspaces button.active,
 #workspaces button.visible {
     color: #89b4fa;
-    box-shadow: inset 0 -1px #1e1e2e;
+    box-shadow: inset 0 -0.0625em #1e1e2e; /* 1px -> em */
 }
 
 #workspaces button.urgent {
     color: #f38ba8;
 }
 
+/* -----------------------------
+   Modules (consistent styling)
+   ----------------------------- */
 #custom-weather,
 #language,
+#battery,
 #cpu,
 #window,
 #clock,
@@ -68,65 +74,96 @@ tooltip {
 #memory,
 #disk {
     background: #1e1e2e;
-    opacity: 1.0;
-    padding: 1.5px 7px;
-    margin-top: 3px;
-    margin-bottom: 3px;
-    border-radius: 13px;
-    margin-right: 2px;
-    margin-left: 2px;
+    opacity: 1;
+    padding: 0.25em 0.75em;   /* 4px 12px -> em */
+    margin-top: 0.1875em;     /* 3px -> em */
+    margin-bottom: 0.1875em;
+    border-radius: 0.8125em;  /* 13px -> em */
+    margin-left: 0.125em;
+    margin-right: 0.125em;
 }
 
+/* Left side modules */
+#custom-weather {
+    margin-left: 0.625em;
+    margin-right: 0.125em;
+    padding-left: 0.75em;
+    padding-right: 0.75em;
+}
+
+#cpu,
+#memory,
+#disk {
+    margin-left: 0.125em;
+    margin-right: 0.125em;
+}
+
+/* Right side modules */
+#language {
+    margin-left: 0.625em;
+    margin-right: 0.125em;
+}
+
+#battery {
+    margin-left: 0.125em;
+    margin-right: 0.125em;
+    padding: 0.25em 0.75em;
+}
+
+#battery.warning {
+    background: #1e1e2e;
+    color: #f9e2af;
+}
+
+#battery.warning icon {
+    color: #f9e2af;
+}
+
+#battery.critical {
+    background: #1e1e2e;
+    color: #f38ba8;
+    animation: blink 1s ease-in-out infinite;
+}
+
+#battery.charging {
+    background: #1e1e2e;
+}
+
+/* Clock, pulseaudio, tray spacing */
+#pulseaudio,
+#pulseaudio.microphone,
+#clock,
+#tray {
+    margin-left: 0.125em;
+    margin-right: 0.125em;
+    padding: 0.25em 0.5em;
+}
+
+/* Blinking animation for critical battery */
+@keyframes blink {
+    0% { opacity: 1; }
+    50% { opacity: 0.6; }
+    100% { opacity: 1; }
+}
+
+/* Icons and text spacing */
+#battery span,
+#pulseaudio span,
+#pulseaudio.microphone span,
+#cpu span,
+#memory span,
+#disk span,
+#language span,
+#clock span {
+    margin-right: 0.125em;
+}
+
+/* Workspaces container */
 #workspaces {
     background: #1e1e2e;
-    border-radius: 13px;
-    margin-left: 2px;
-    margin-right: 2px;
-    padding-right: 0px;
-}
-
-#custom-weather {
-    margin-left: 10px;
-    margin-right: 2px;
-}
-
-#cpu {
-    padding-left: 10px;
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
-#memory {
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
-#disk {
-    margin-left: 2px;
-    margin-right: 10px;
-}
-
-#language {
-    margin-left: 10px;
-    margin-right: 2px;
-}
-
-#pulseaudio {
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
-#pulseaudio.microphone {
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
-#clock {
-    margin-left: 2px;
-    margin-right: 2px;
-}
-
-#tray {
-    margin-left: 2px;
-    margin-right: 10px;
+    border-radius: 0.8125em;
+    margin-left: 0.125em;
+    margin-right: 0.125em;
+    padding-left: 0.5em;
+    padding-right: 0;
 }

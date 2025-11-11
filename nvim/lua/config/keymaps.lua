@@ -12,21 +12,30 @@ vim.keymap.set("n", "<leader>fT", function()
   }):toggle()
 end, { desc = "Terminal (current file dir)" })
 
--- Open terminal at bottom - TOGGLETERM
+-- -- Open terminal at bottom - TOGGLETERM
+-- vim.keymap.set("n", "<leader>tt", function()
+--   local ok, toggleterm = pcall(require, "toggleterm.terminal")
+--   if not ok then
+--     vim.notify("toggleterm.nvim not found", vim.log.levels.ERROR)
+--     return
+--   end
+--   toggleterm.Terminal
+--     :new({
+--       dir = vim.fn.expand("%:p:h"), -- current file's directory
+--       direction = "horizontal", -- open at bottom
+--       hidden = true,
+--     })
+--     :toggle()
+-- end, { desc = "Terminal (bottom, current file dir)" })
+--
+
+-- Toggle tmux popup terminal (<leader>tt) - TMUX
 vim.keymap.set("n", "<leader>tt", function()
-  local ok, toggleterm = pcall(require, "toggleterm.terminal")
-  if not ok then
-    vim.notify("toggleterm.nvim not found", vim.log.levels.ERROR)
-    return
-  end
-  toggleterm.Terminal
-    :new({
-      dir = vim.fn.expand("%:p:h"), -- current file's directory
-      direction = "horizontal", -- open at bottom
-      hidden = true,
-    })
-    :toggle()
-end, { desc = "Terminal (bottom, current file dir)" })
+  local current_dir = vim.fn.expand("%:p:h")
+  vim.fn.system(
+    string.format("tmux display-popup -E -w 80%% -h 80%% 'tmux new-session -A -s popup-term -c \"%s\"'", current_dir)
+  )
+end, { desc = "Toggle popup terminal" })
 
 -- Exit terminal mode with Ctrl+t and go to normal mode
 vim.keymap.set("t", "<C-t>", [[<C-\><C-n>]], { desc = "Exit terminal to normal mode" })

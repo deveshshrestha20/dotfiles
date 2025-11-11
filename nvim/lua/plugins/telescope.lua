@@ -35,86 +35,73 @@ return {
         "<leader><leader>",
         function()
           local function find_project_root()
-            local root_markers = {
+            -- Prioritized markers - checked first
+            local priority_markers = {
               ".git",
+              ".hg",
+              ".svn",
+            }
+
+            -- Secondary markers
+            local secondary_markers = {
               "*.sln",
               "*.csproj",
               "global.json",
-              "Directory.Build.props",
-              "nuget.config",
-              "Program.cs",
-              ".gitignore",
-              ".hg",
-              ".svn",
-              "*.fsproj",
-              "*.vbproj",
-              "main.py",
-              "app.py",
-              "manage.py",
-              "requirements.txt",
-              "setup.py",
               "pyproject.toml",
-              "Pipfile",
+              "setup.py",
               "poetry.lock",
+              "Pipfile",
+              "docker-compose.yml",
               "package.json",
-              "package-lock.json",
-              "yarn.lock",
-              "pnpm-lock.yaml",
-              "node_modules",
-              "tsconfig.json",
               "Cargo.toml",
-              "Cargo.lock",
               "go.mod",
-              "go.sum",
               "pom.xml",
-              "build.gradle",
-              "gradlew",
               "composer.json",
               "Gemfile",
-              "Makefile",
               "CMakeLists.txt",
               ".root",
-              "README.md",
             }
 
             local current_file = vim.fn.expand("%:p")
-            local current_dir
+            local current_dir = current_file == "" and vim.fn.getcwd() or vim.fn.fnamemodify(current_file, ":h")
 
-            if current_file == "" then
-              current_dir = vim.fn.getcwd()
-            else
-              current_dir = vim.fn.fnamemodify(current_file, ":h")
+            local function has_marker(path, marker)
+              local marker_path = path .. "/" .. marker
+              if marker:match("%*") then
+                local matches = vim.fn.glob(marker_path, false, true)
+                return #matches > 0
+              else
+                return vim.fn.isdirectory(marker_path) == 1 or vim.fn.filereadable(marker_path) == 1
+              end
             end
 
-            local function search_upwards(path)
+            local function search_upwards(path, markers)
               if path == "/" or path == "" or path == vim.fn.expand("~") then
-                return vim.fn.getcwd()
+                return nil
               end
 
-              for _, marker in ipairs(root_markers) do
-                local marker_path = path .. "/" .. marker
-
-                if marker:match("%*") then
-                  local matches = vim.fn.glob(marker_path, false, true)
-                  if #matches > 0 then
-                    return path
-                  end
-                else
-                  if vim.fn.isdirectory(marker_path) == 1 or vim.fn.filereadable(marker_path) == 1 then
-                    return path
-                  end
+              for _, marker in ipairs(markers) do
+                if has_marker(path, marker) then
+                  return path
                 end
               end
 
               local parent = vim.fn.fnamemodify(path, ":h")
               if parent == path then
-                return vim.fn.getcwd()
+                return nil
               end
-
-              return search_upwards(parent)
+              return search_upwards(parent, markers)
             end
 
-            return search_upwards(current_dir)
+            -- First try priority markers (like .git)
+            local root = search_upwards(current_dir, priority_markers)
+
+            -- If not found, try secondary markers
+            if not root then
+              root = search_upwards(current_dir, secondary_markers)
+            end
+
+            return root or vim.fn.getcwd()
           end
 
           local project_root = find_project_root()
@@ -125,7 +112,6 @@ return {
         end,
         desc = "Find files in project root",
       },
-
       -- GREP 1: Search text in entire project
       {
         "<leader>sg",

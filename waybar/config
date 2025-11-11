@@ -1,9 +1,12 @@
 {
-
   "position": "top",
   "exclusive": "true",
   "passthrough": "true",
   "gtk-layer-shell": "true",
+   "outputs": {
+    "eDP-2": { "height": 41 },    // laptop
+    "HDMI-A-1": { "height": 20 }  // external monitor
+  },
   "margin-top": 10,
   "margin-left": 10,
   "margin-right": 10,
@@ -19,14 +22,13 @@
   ],
   "modules-right": [
     "hyprland/language",
+    "battery",
     "pulseaudio",
     "pulseaudio#microphone",
     "clock",
     "separator",
     "tray"
   ],
-
-
   "tray": {
     "icon-size": 16,
     "icon-theme": "Papirus",
@@ -47,8 +49,6 @@
     },
     "separate-outputs": true
   },
-
-
 "hyprland/workspaces": {
     "format": "{icon}",
     "on-click": "activate",
@@ -78,7 +78,18 @@
     "format": "<span color='#89b4fa'>󰥔 </span><span color='#cdd6f4'>{:%H:%M | %a %d %b}</span>",
     "format-alt": "{:%Y-%m-%d}"
   },
-
+ "battery": {
+    "states": {
+      "warning": 30,
+      "critical": 15
+    },
+    "format": "<span color='#a6e3a1'>{icon}</span> <span color='#cdd6f4'>{capacity}%</span>",
+    "format-charging": "<span color='#a6e3a1'>󰂄</span> <span color='#cdd6f4'>{capacity}%</span>",
+    "format-plugged": "<span color='#a6e3a1'>󰚥</span> <span color='#cdd6f4'>{capacity}%</span>",
+    "format-full": "<span color='#a6e3a1'>󰁹</span> <span color='#cdd6f4'>{capacity}%</span>",
+    "format-icons": ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+    "tooltip-format": "{timeTo} • {power}W"
+  },
   "cpu": {
     "format": "<span color='#89b4fa'>󰍛</span> <span color='#cdd6f4'>{usage}%</span>",
     "interval": 1,
@@ -91,16 +102,12 @@
     "interval": 3,
     "format": "<span color='#f38ba8'> </span> <span color='#cdd6f4'>{used:0.1f}G</span>"
   },
-
-
 "custom/weather": {
     "exec": "~/.config/hypr/scripts/weather.sh",
     "return-type": "json",
     "interval": 600,
     "format": "{text}"
 },
-
-
   "pulseaudio": {
     "format": "<span color='#a6e3a1'>{icon} </span><span color='#cdd6f4'>{volume}%</span>",
     "format-bluetooth": "<span color='#a6e3a1'>{icon}</span>  <span color='#cdd6f4'>{volume}%</span>",
@@ -131,20 +138,15 @@
     "on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 5%+",
     "on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 5%-",
   },
-
    "hyprland/language": {
-
   "format": "<span color='#f9e2af'>󰌌</span> <span color='#cdd6f4'>{}</span>",
-
   "format-ar": "ara",
-
   "format-en": "eng",
-
 },
   "disk":{
-	"interval": 3,
+    "interval": 3,
   "path": "/home",
-	"format": "<span color='#a6e3a1'> </span><span color='#cdd6f4'>{free}</span>",
-	"unit": "GB"
+    "format": "<span color='#a6e3a1'> </span><span color='#cdd6f4'>{free}</span>",
+    "unit": "GB"
 },
 }
