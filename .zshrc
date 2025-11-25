@@ -1,3 +1,4 @@
+
 # Suppress instant prompt warning for fastfetch output
 typeset -g POWERLEVEL9K_INSTANT_PROMPT=quiet
 
@@ -106,4 +107,7 @@ eval "$(fzf --zsh)"
 eval "$(zoxide init --cmd cd zsh)"
 export PATH="$PATH:$HOME/.dotnet/tools"
 export PATH="$HOME/bin:$PATH"
+export PATH="$HOME/.local/bin:$PATH"
+
+
 export PATH="$HOME/.local/bin:$PATH"
