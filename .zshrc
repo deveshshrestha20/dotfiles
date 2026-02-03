@@ -108,6 +108,13 @@ eval "$(zoxide init --cmd cd zsh)"
 export PATH="$PATH:$HOME/.dotnet/tools"
 export PATH="$HOME/bin:$PATH"
 export PATH="$HOME/.local/bin:$PATH"
-
+export EDITOR=nvim
+export VISUAL=nvim
 
 export PATH="$HOME/.local/bin:$PATH"
+
+# Eza    
+alias ls="eza --color=always --long --git --no-filesize --icons=always --no-time --no-user --no-permissions"
+# Docker MYSQL Alias
+alias mysql-docker='docker exec -it my-mysql mysql -u root -p'
+export PATH="$PATH:/opt/mssql-tools18/bin"
