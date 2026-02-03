@@ -19,16 +19,14 @@ return {
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
+    dependencies = {
+      "mason-org/mason-lspconfig.nvim",
+      "hrsh7th/cmp-nvim-lsp",
+    },
     config = function()
       local lspconfig = require("lspconfig")
-      -- Get capabilities
-      local capabilities
-      local ok, blink = pcall(require, "blink.cmp")
-      if ok then
-        capabilities = blink.get_lsp_capabilities()
-      else
-        capabilities = require("cmp_nvim_lsp").default_capabilities()
-      end
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
       -- Manually setup each server
       lspconfig.lua_ls.setup({
         capabilities = capabilities,
@@ -48,6 +46,7 @@ return {
           },
         },
       })
+
       lspconfig.pyright.setup({
         capabilities = capabilities,
         settings = {
@@ -61,6 +60,7 @@ return {
           },
         },
       })
+
       lspconfig.clangd.setup({
         capabilities = capabilities,
         cmd = {
@@ -69,21 +69,13 @@ return {
           "--pch-storage=memory",
         },
       })
-      lspconfig.gopls.setup({
-        capabilities = capabilities,
-      })
-      lspconfig.ts_ls.setup({
-        capabilities = capabilities,
-      })
-      lspconfig.html.setup({
-        capabilities = capabilities,
-      })
-      lspconfig.cssls.setup({
-        capabilities = capabilities,
-      })
-      lspconfig.jsonls.setup({
-        capabilities = capabilities,
-      })
+
+      lspconfig.gopls.setup({ capabilities = capabilities })
+      lspconfig.ts_ls.setup({ capabilities = capabilities })
+      lspconfig.html.setup({ capabilities = capabilities })
+      lspconfig.cssls.setup({ capabilities = capabilities })
+      lspconfig.jsonls.setup({ capabilities = capabilities })
+
       -- Keymaps
       local opts = { noremap = true, silent = true }
       vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)

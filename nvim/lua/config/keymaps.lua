@@ -139,66 +139,20 @@ end, { desc = "Split horizontal (switch buffer)" })
 -- Close current split
 vim.keymap.set("n", "<leader>sc", "<cmd>close<cr>", { desc = "Close split" })
 
--- Keymap to toggle a floating scratchpad (persistent)
-vim.keymap.set("n", "<leader>n", function()
-  -- Check if scratchpad buffer already exists
-  if not vim.g.scratchpad_buf or not vim.api.nvim_buf_is_valid(vim.g.scratchpad_buf) then
-    -- Create new scratch buffer if it doesn't exist
-    vim.g.scratchpad_buf = vim.api.nvim_create_buf(false, true)
+local obsidian_plugin = "obsidian.nvim"
 
-    -- Set buffer options using vim.bo (new API)
-    vim.bo[vim.g.scratchpad_buf].buftype = "nofile"
-    vim.bo[vim.g.scratchpad_buf].bufhidden = "hide" -- Keep buffer when window closes
-    vim.bo[vim.g.scratchpad_buf].swapfile = false
-    vim.bo[vim.g.scratchpad_buf].filetype = "markdown" -- Optional: set filetype for syntax highlighting
+-- Create a helper function to load obsidian.nvim if not already loaded
+local function obsidian_cmd(cmd)
+  return function()
+    require("lazy").load({ plugins = { obsidian_plugin } })
+    vim.cmd(cmd)
   end
+end
 
-  -- Check if scratchpad window is already open
-  for _, win in ipairs(vim.api.nvim_list_wins()) do
-    if vim.api.nvim_win_get_buf(win) == vim.g.scratchpad_buf then
-      -- If window is open, close it (toggle)
-      vim.api.nvim_win_close(win, true)
-      return
-    end
-  end
-
-  -- Calculate window size and position
-  local width = math.floor(vim.o.columns * 0.6)
-  local height = math.floor(vim.o.lines * 0.5)
-  local row = math.floor((vim.o.lines - height) / 2)
-  local col = math.floor((vim.o.columns - width) / 2)
-
-  local opts = {
-    style = "minimal",
-    relative = "editor",
-    width = width,
-    height = height,
-    row = row,
-    col = col,
-    border = "rounded",
-  }
-
-  -- Open floating window with the persistent buffer
-  local win = vim.api.nvim_open_win(vim.g.scratchpad_buf, true, opts)
-
-  -- Ensure cursor is in the window
-  vim.api.nvim_set_current_win(win)
-
-  -- Move cursor to end of buffer (last line, last column)
-  local line_count = vim.api.nvim_buf_line_count(vim.g.scratchpad_buf)
-  local last_line = vim.api.nvim_buf_get_lines(vim.g.scratchpad_buf, -2, -1, false)[1] or ""
-  vim.api.nvim_win_set_cursor(win, { line_count, #last_line })
-
-  -- Automatically enter insert mode (optional, remove if you don't want this)
-  vim.cmd("startinsert")
-end, { desc = "Toggle floating scratchpad" })
-
--- Clear scratchpad content
-vim.keymap.set("n", "<leader>nc", function()
-  if vim.g.scratchpad_buf and vim.api.nvim_buf_is_valid(vim.g.scratchpad_buf) then
-    vim.api.nvim_buf_set_lines(vim.g.scratchpad_buf, 0, -1, false, {})
-    vim.notify("Scratchpad cleared!", vim.log.levels.INFO)
-  end
-end, { desc = "Clear scratchpad" })
-
-vim.keymap.set("n", "<leader>z", ":MaximizerToggle<CR>", { desc = "Toggle Zoom" })
+-- Keymaps
+vim.keymap.set("n", "<leader>nn", obsidian_cmd("ObsidianNew"), { desc = "Obsidian New Note" })
+vim.keymap.set("n", "<leader>nt", obsidian_cmd("ObsidianToday"), { desc = "Obsidian Today" })
+vim.keymap.set("n", "<leader>ns", obsidian_cmd("ObsidianSearch"), { desc = "Obsidian Search" })
+vim.keymap.set("n", "<leader>nl", obsidian_cmd("ObsidianLinks"), { desc = "Obsidian Backlinks" })
+vim.keymap.set("n", "<leader>nd", obsidian_cmd("ObsidianDailies"), { desc = "Obsidian Daily Notes" })
+vim.keymap.set("n", "<leader>nb", obsidian_cmd("ObsidianBacklinks"), { desc = "Obsidian Backlink Panel" })
