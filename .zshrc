@@ -118,3 +118,8 @@ alias ls="eza --color=always --long --git --no-filesize --icons=always --no-time
 # Docker MYSQL Alias
 alias mysql-docker='docker exec -it my-mysql mysql -u root -p'
 export PATH="$PATH:/opt/mssql-tools18/bin"
+
+# Java 
+
+export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
+export PATH=$JAVA_HOME/bin:$PATH

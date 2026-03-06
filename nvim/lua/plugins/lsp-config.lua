@@ -1,21 +1,30 @@
 return {
+  -- Mason (LSP installer)
   {
     "mason-org/mason.nvim",
     build = ":MasonUpdate",
     cmd = "Mason",
-    opts = {
-      registries = {
-        "github:mason-org/mason-registry",
-        "github:crashdummyy/mason-registry",
-      },
-    },
+    opts = {},
   },
+
+  -- Mason LSP config
   {
     "mason-org/mason-lspconfig.nvim",
     opts = {
-      ensure_installed = {},
+      ensure_installed = {
+        "lua_ls",
+        "pyright",
+        "tsserver",
+        "html",
+        "cssls",
+        "jsonls",
+        "clangd",
+        "gopls",
+      },
     },
   },
+
+  -- LSP configuration
   {
     "neovim/nvim-lspconfig",
     event = { "BufReadPre", "BufNewFile" },
@@ -27,56 +36,31 @@ return {
       local lspconfig = require("lspconfig")
       local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
-      -- Manually setup each server
+      -- Lua
       lspconfig.lua_ls.setup({
         capabilities = capabilities,
         settings = {
           Lua = {
-            diagnostics = {
-              globals = { "vim" },
-            },
-            workspace = {
-              library = {
-                vim.api.nvim_get_runtime_file("", true),
-              },
-            },
-            telemetry = {
-              enable = false,
-            },
+            diagnostics = { globals = { "vim" } },
+            workspace = { library = vim.api.nvim_get_runtime_file("", true) },
+            telemetry = { enable = false },
           },
         },
       })
 
-      lspconfig.pyright.setup({
-        capabilities = capabilities,
-        settings = {
-          python = {
-            pythonPath = "/home/devesh/PycharmProjects/FastAPIProject/.venv/bin/python",
-            analysis = {
-              autoSearchPaths = true,
-              diagnosticMode = "openFilesOnly",
-              useLibraryCodeForTypes = true,
-            },
-          },
-        },
-      })
+      -- Python
+      lspconfig.pyright.setup({ capabilities = capabilities })
 
-      lspconfig.clangd.setup({
-        capabilities = capabilities,
-        cmd = {
-          "clangd",
-          "--background-index",
-          "--pch-storage=memory",
-        },
-      })
+      -- C#
+      lspconfig.roslyn_lsp = {} -- handled by roslyn.nvim plugin later
 
-      lspconfig.gopls.setup({ capabilities = capabilities })
-      lspconfig.ts_ls.setup({ capabilities = capabilities })
+      -- JS/TS, HTML, CSS, JSON
+      lspconfig.tsserver.setup({ capabilities = capabilities })
       lspconfig.html.setup({ capabilities = capabilities })
       lspconfig.cssls.setup({ capabilities = capabilities })
       lspconfig.jsonls.setup({ capabilities = capabilities })
 
-      -- Keymaps
+      -- Keymaps (common for all LSPs)
       local opts = { noremap = true, silent = true }
       vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
       vim.keymap.set("n", "gd", vim.lsp.buf.definition, opts)
@@ -87,4 +71,58 @@ return {
       vim.keymap.set("n", "<leader>d", vim.diagnostic.open_float, opts)
     end,
   },
+
+  -- C# formatting with Roslyn
+  {
+    "seblj/roslyn.nvim",
+    ft = "cs",
+    dependencies = { "hrsh7th/cmp-nvim-lsp" },
+    config = function()
+      local roslyn = require("roslyn")
+      local capabilities = require("cmp_nvim_lsp").default_capabilities()
+
+      roslyn.setup({
+        capabilities = capabilities,
+        filetypes = { "cs" },
+        on_attach = function(client, bufnr)
+          -- Enable formatting
+          client.server_capabilities.documentFormattingProvider = true
+          vim.api.nvim_create_autocmd("BufWritePre", {
+            buffer = bufnr,
+            callback = function()
+              vim.lsp.buf.format({ async = false })
+            end,
+          })
+        end,
+      })
+    end,
+  },
+
+  -- -- Conform.nvim (general formatter)
+  -- {
+  --   "stevearc/conform.nvim",
+  --   event = "BufReadPre",
+  --   config = function()
+  --     require("conform").setup({
+  --       formatters_by_ft = {
+  --         lua = { "stylua" },
+  --         javascript = { "prettier" },
+  --         typescript = { "prettier" },
+  --         html = { "prettier" },
+  --         css = { "prettier" },
+  --         scss = { "prettier" },
+  --         json = { "prettier" },
+  --       },
+  --     })
+  --
+  --     -- Auto-format on save for all files EXCEPT C#
+  --     vim.api.nvim_create_autocmd("BufWritePre", {
+  --       callback = function()
+  --         if vim.bo.filetype ~= "cs" then
+  --           require("conform").format({ async = false })
+  --         end
+  --       end,
+  --     })
+  --   end,
+  -- },
 }
