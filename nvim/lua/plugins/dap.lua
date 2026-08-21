@@ -8,33 +8,76 @@ return {
       "nvim-neotest/nvim-nio",
       "mason-org/mason.nvim",
     },
+
     config = function()
       local dap = require("dap")
-      local ui = require("dapui")
+      local dapui = require("dapui")
+      local widgets = require("dap.ui.widgets")
 
-      require("dapui").setup()
+      ------------------------------------------------------------------------
+      -- Plugins
+      ------------------------------------------------------------------------
+      dapui.setup()
       require("dap-go").setup()
 
       require("nvim-dap-virtual-text").setup({
         display_callback = function(variable)
-          local name = string.lower(variable.name)
-          local value = string.lower(variable.value)
+          local name = variable.name:lower()
+          local value = variable.value:lower()
+
           if name:match("secret") or name:match("api") or value:match("secret") or value:match("api") then
-            return "*****"
+            return " *****"
           end
-          if #variable.value > 15 then
-            return " " .. string.sub(variable.value, 1, 15) .. "... "
+
+          if #variable.value > 30 then
+            return " " .. variable.value:sub(1, 30) .. "..."
           end
+
           return " " .. variable.value
         end,
       })
 
-      -- 1. C# Configuration
+      ------------------------------------------------------------------------
+      -- Signs
+      ------------------------------------------------------------------------
+
+      vim.fn.sign_define("DapBreakpoint", {
+        text = "",
+        texthl = "DiagnosticError",
+      })
+
+      vim.fn.sign_define("DapBreakpointCondition", {
+        text = "",
+        texthl = "DiagnosticWarn",
+      })
+
+      vim.fn.sign_define("DapLogPoint", {
+        text = "󰆏",
+        texthl = "DiagnosticInfo",
+      })
+
+      vim.fn.sign_define("DapStopped", {
+        text = "",
+        texthl = "DiagnosticHint",
+        linehl = "Visual",
+        numhl = "",
+      })
+
+      vim.fn.sign_define("DapBreakpointRejected", {
+        text = "",
+        texthl = "DiagnosticWarn",
+      })
+
+      ----------------------------------------------------------------------
+      -- C#
+      ----------------------------------------------------------------------
+
       dap.adapters.coreclr = {
         type = "executable",
         command = "netcoredbg",
         args = { "--interpreter=vscode" },
       }
+
       dap.configurations.cs = {
         {
           type = "coreclr",
@@ -44,19 +87,28 @@ return {
             return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/bin/Debug/", "file")
           end,
         },
-      }
+        {
+          type = "coreclr",
+          name = "Attach to Godot",
+          request = "attach",
+          processId = require("dap.utils").pick_process,
+        },
+      } ------------------------------------------------------------------------
+      -- Elixir
+      ------------------------------------------------------------------------
 
-      -- 2. Elixir Configuration
       local elixir_ls_debugger = vim.fn.exepath("elixir-ls-debugger")
+
       if elixir_ls_debugger ~= "" then
         dap.adapters.mix_task = {
           type = "executable",
           command = elixir_ls_debugger,
         }
+
         dap.configurations.elixir = {
           {
             type = "mix_task",
-            name = "phoenix server",
+            name = "Phoenix Server",
             task = "phx.server",
             request = "launch",
             projectDir = "${workspaceFolder}",
@@ -66,43 +118,116 @@ return {
         }
       end
 
-      -- === KEYMAPS (Refactored to <leader>D) ===
+      ------------------------------------------------------------------------
+      -- Keymaps
+      ------------------------------------------------------------------------
 
       -- Breakpoints
-      vim.keymap.set("n", "<leader>Db", dap.toggle_breakpoint, { desc = "Debug: Toggle Breakpoint" })
+      vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, {
+        desc = "DAP: Toggle Breakpoint",
+      })
+
+      vim.keymap.set("n", "<leader>dB", function()
+        dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
+      end, {
+        desc = "DAP: Conditional Breakpoint",
+      })
+
+      vim.keymap.set("n", "<leader>dg", function()
+        dap.set_breakpoint(nil, nil, vim.fn.input("Log point: "))
+      end, {
+        desc = "DAP: Log Point",
+      })
 
       -- Execution
-      vim.keymap.set("n", "<leader>Dc", dap.continue, { desc = "Debug: Start/Continue" })
-      vim.keymap.set("n", "<leader>DC", dap.run_to_cursor, { desc = "Debug: Run to Cursor" })
+      vim.keymap.set("n", "<leader>dc", dap.continue, {
+        desc = "DAP: Continue",
+      })
+
+      vim.keymap.set("n", "<leader>dr", function()
+        dap.terminate()
+        dap.run_last()
+      end, {
+        desc = "DAP: Restart",
+      })
+
+      vim.keymap.set("n", "<leader>dl", dap.run_last, {
+        desc = "DAP: Run Last",
+      })
+
+      vim.keymap.set("n", "<leader>dq", dap.terminate, {
+        desc = "DAP: Terminate",
+      })
+
+      vim.keymap.set("n", "<leader>dC", dap.run_to_cursor, {
+        desc = "DAP: Run to Cursor",
+      })
 
       -- Stepping
-      vim.keymap.set("n", "<leader>Di", dap.step_into, { desc = "Debug: Step Into" })
-      vim.keymap.set("n", "<leader>Do", dap.step_over, { desc = "Debug: Step Over" })
-      vim.keymap.set("n", "<leader>Du", dap.step_out, { desc = "Debug: Step Out" }) -- u for Up/Out
-      vim.keymap.set("n", "<leader>Dp", dap.step_back, { desc = "Debug: Step Back" }) -- p for Previous
+      vim.keymap.set("n", "<leader>di", dap.step_into, {
+        desc = "DAP: Step Into",
+      })
 
-      -- Management
-      vim.keymap.set("n", "<leader>Dr", dap.restart, { desc = "Debug: Restart" })
-      vim.keymap.set("n", "<leader>Dq", dap.terminate, { desc = "Debug: Terminate" })
+      vim.keymap.set("n", "<leader>do", dap.step_over, {
+        desc = "DAP: Step Over",
+      })
 
-      -- UI / Eval
-      vim.keymap.set("n", "<leader>Dt", ui.toggle, { desc = "Debug: Toggle UI" })
-      vim.keymap.set("n", "<leader>D?", function()
-        require("dapui").eval(nil, { enter = true })
-      end, { desc = "Debug: Eval var under cursor" })
+      vim.keymap.set("n", "<leader>dO", dap.step_out, {
+        desc = "DAP: Step Out",
+      })
 
-      -- Listeners
-      dap.listeners.before.attach.dapui_config = function()
-        ui.open()
+      vim.keymap.set("n", "<leader>dp", dap.step_back, {
+        desc = "DAP: Step Back",
+      })
+
+      -- UI
+      vim.keymap.set("n", "<leader>du", dapui.toggle, {
+        desc = "DAP: Toggle UI",
+      })
+
+      vim.keymap.set({ "n", "v" }, "<leader>de", function()
+        dapui.eval()
+      end, {
+        desc = "DAP: Evaluate",
+      })
+
+      vim.keymap.set("n", "<leader>ds", dap.repl.open, {
+        desc = "DAP: Open REPL",
+      })
+
+      -- Widgets
+      vim.keymap.set("n", "<leader>dh", widgets.hover, {
+        desc = "DAP: Hover Variable",
+      })
+
+      vim.keymap.set("n", "<leader>df", widgets.centered_float, {
+        desc = "DAP: Floating Scopes",
+      })
+
+      ------------------------------------------------------------------------
+      -- Vimdow / Godot
+      ------------------------------------------------------------------------
+
+      vim.keymap.set("n", "<leader>dt", function()
+        vim.cmd("VimdowToggleBreakpoint")
+      end, {
+        desc = "Godot: Toggle Breakpoint",
+      })
+
+      ------------------------------------------------------------------------
+      -- DAP UI Listeners
+      ------------------------------------------------------------------------
+
+      dap.listeners.after.event_initialized["dapui_config"] = function()
+        dapui.open()
       end
-      dap.listeners.before.launch.dapui_config = function()
-        ui.open()
+
+      dap.listeners.before.event_terminated["dapui_config"] = function()
+        dapui.close()
       end
-      dap.listeners.before.event_terminated.dapui_config = function()
-        ui.close()
-      end
-      dap.listeners.before.event_exited.dapui_config = function()
-        ui.close()
+
+      dap.listeners.before.event_exited["dapui_config"] = function()
+        dapui.close()
       end
     end,
   },

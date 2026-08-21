@@ -10,6 +10,9 @@ return {
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
 
     roslyn.setup({
+
+      cmd = { "roslyn-language-server", "--stdio" },
+
       capabilities = capabilities,
       on_attach = function(client, bufnr)
         print("Roslyn LSP attached!")

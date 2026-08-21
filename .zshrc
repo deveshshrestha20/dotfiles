@@ -123,3 +123,8 @@ export PATH="$PATH:/opt/mssql-tools18/bin"
 
 export JAVA_HOME=/usr/lib/jvm/java-25-openjdk
 export PATH=$JAVA_HOME/bin:$PATH
+export PYENV_ROOT="$HOME/.pyenv"
+export PATH="$PYENV_ROOT/bin:$PATH"
+eval "$(pyenv init --path)"
+eval "$(pyenv init -)"
+export GEMINI_API_KEY="AQ.Ab8RN6IxXWzNDkzhmlGhlyOsxUVwTsj1DO59o_RfAou81KOLnA"

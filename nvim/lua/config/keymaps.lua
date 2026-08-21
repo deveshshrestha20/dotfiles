@@ -140,19 +140,3 @@ end, { desc = "Split horizontal (switch buffer)" })
 vim.keymap.set("n", "<leader>sc", "<cmd>close<cr>", { desc = "Close split" })
 
 local obsidian_plugin = "obsidian.nvim"
-
--- Create a helper function to load obsidian.nvim if not already loaded
-local function obsidian_cmd(cmd)
-  return function()
-    require("lazy").load({ plugins = { obsidian_plugin } })
-    vim.cmd(cmd)
-  end
-end
-
--- Keymaps
-vim.keymap.set("n", "<leader>nn", obsidian_cmd("ObsidianNew"), { desc = "Obsidian New Note" })
-vim.keymap.set("n", "<leader>nt", obsidian_cmd("ObsidianToday"), { desc = "Obsidian Today" })
-vim.keymap.set("n", "<leader>ns", obsidian_cmd("ObsidianSearch"), { desc = "Obsidian Search" })
-vim.keymap.set("n", "<leader>nl", obsidian_cmd("ObsidianLinks"), { desc = "Obsidian Backlinks" })
-vim.keymap.set("n", "<leader>nd", obsidian_cmd("ObsidianDailies"), { desc = "Obsidian Daily Notes" })
-vim.keymap.set("n", "<leader>nb", obsidian_cmd("ObsidianBacklinks"), { desc = "Obsidian Backlink Panel" })

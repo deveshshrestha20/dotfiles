@@ -60,6 +60,10 @@ return {
       lspconfig.cssls.setup({ capabilities = capabilities })
       lspconfig.jsonls.setup({ capabilities = capabilities })
 
+      lspconfig.gdscript.setup({
+        capabilities = capabilities,
+      })
+
       -- Keymaps (common for all LSPs)
       local opts = { noremap = true, silent = true }
       vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
