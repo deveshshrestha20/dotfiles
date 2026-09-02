@@ -3,8 +3,21 @@ return {
   {
     "LazyVim/LazyVim",
     opts = {
-      colorscheme = "catppuccin",
+      colorscheme = "cendre",
     },
+  },
+
+  -- Install and configure Cendre
+  {
+    "Aejkatappaja/cendre",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      require("cendre").setup({
+        background = "hard",
+        italic_virtual_text = false,
+      })
+    end,
   },
 
   -- Install and configure rose-pine

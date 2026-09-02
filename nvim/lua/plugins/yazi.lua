@@ -6,8 +6,7 @@ return {
     require("yazi").setup({
       open_for_directories = true,
       show_hidden = true,
-      floating_window = true, -- make Yazi open as a floating window
-      floating_window_scaling_factor = 0.8, -- (optional) adjust window size
+      yazi_floating_window_border = "none",
       previewer_scaling_factor = 0.7, -- scale images inside the floating window
       image_preview_alignment = "center", -- center images in the preview
       keymaps = {

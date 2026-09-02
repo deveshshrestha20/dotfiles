@@ -51,6 +51,11 @@ return {
       -- Python
       lspconfig.pyright.setup({ capabilities = capabilities })
 
+      -- C / C++
+      lspconfig.clangd.setup({
+        capabilities = capabilities,
+      })
+
       -- C#
       lspconfig.roslyn_lsp = {} -- handled by roslyn.nvim plugin later
 
