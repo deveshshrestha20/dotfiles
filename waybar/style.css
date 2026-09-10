@@ -1,3 +1,8 @@
+/* =========================================================
+   Nord Theme for Waybar
+   Palette reference: https://www.nordtheme.com/docs/colors-and-palettes
+   ========================================================= */
+
 @define-color nord0  #1B1F27; /* darkest bg (darkened) */
 @define-color nord1  #242933; /* bg elevated (darkened) */
 @define-color nord2  #2E3440; /* bg selection (darkened) */

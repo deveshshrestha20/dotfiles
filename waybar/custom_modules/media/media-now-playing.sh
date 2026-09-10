@@ -1,14 +1,26 @@
 #!/usr/bin/env bash
 
-if playerctl status 2>/dev/null | grep -q 'Playing'; then
-  zscroll -l 20 \
-    --delay 0.3 \
-    --update-check true \
-    "playerctl metadata --format '{{title}} - {{artist}}'" 2>/dev/null
+while true; do
+  firefox_status=$(playerctl -p firefox status 2>/dev/null)
+  mpd_status=$(mpc status 2>/dev/null)
 
-elif mpc status 2>/dev/null | grep -q '\[playing\]'; then
-  zscroll -l 20 \
-    --delay 0.3 \
-    --update-check true \
-    "mpc current" 2>/dev/null
-fi
+  if [ "$firefox_status" = "Playing" ]; then
+    playerctl -p firefox metadata \
+      --format '{{title}} - {{artist}}' 2>/dev/null
+
+  elif printf '%s\n' "$mpd_status" | grep -q '\[playing\]'; then
+    mpc current 2>/dev/null
+
+  elif [ "$firefox_status" = "Paused" ]; then
+    playerctl -p firefox metadata \
+      --format '{{title}} - {{artist}}' 2>/dev/null
+
+  elif printf '%s\n' "$mpd_status" | grep -q '\[paused\]'; then
+    mpc current 2>/dev/null
+
+  else
+    echo ""
+  fi
+
+  sleep 1
+done
