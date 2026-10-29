@@ -33,6 +33,7 @@ return {
             return " " .. variable.value:sub(1, 30) .. "..."
           end
 
+          -- Moved this inside the function where it belongs
           return " " .. variable.value
         end,
       })
@@ -42,50 +43,122 @@ return {
       ------------------------------------------------------------------------
 
       vim.fn.sign_define("DapBreakpoint", {
-        text = "",
+        text = "●",
         texthl = "DiagnosticError",
       })
 
       vim.fn.sign_define("DapBreakpointCondition", {
-        text = "",
+        text = "◆",
         texthl = "DiagnosticWarn",
       })
 
       vim.fn.sign_define("DapLogPoint", {
-        text = "󰆏",
+        text = "◇",
         texthl = "DiagnosticInfo",
       })
 
       vim.fn.sign_define("DapStopped", {
-        text = "",
+        text = "▶",
         texthl = "DiagnosticHint",
         linehl = "Visual",
         numhl = "",
       })
 
       vim.fn.sign_define("DapBreakpointRejected", {
-        text = "",
+        text = "✖",
         texthl = "DiagnosticWarn",
       })
 
-      ----------------------------------------------------------------------
-      -- C#
-      ----------------------------------------------------------------------
+      ------------------------------------------------------------------------
+      -- C# / .NET
+      ------------------------------------------------------------------------
+
+      -- Prefer netcoredbg from PATH (Mason adds its bin dir once mason.setup()
+      -- has run), otherwise fall back to the Mason package location.
+      local netcoredbg = vim.fn.exepath("netcoredbg")
+      if netcoredbg == "" then
+        netcoredbg = vim.fn.stdpath("data") .. "/mason/packages/netcoredbg/netcoredbg/netcoredbg"
+      end
 
       dap.adapters.coreclr = {
         type = "executable",
-        command = "netcoredbg",
+        command = netcoredbg,
         args = { "--interpreter=vscode" },
       }
+
+      -- Builds the project, then finds the dll to debug.
+      -- Walk up from the current file to find the .csproj (then .sln).
+      -- Falls back to nvim's cwd if the buffer isn't inside a project.
+      local function project_root()
+        local root = vim.fs.root(0, function(name)
+          return name:match("%.csproj$") ~= nil
+        end) or vim.fs.root(0, function(name)
+          return name:match("%.sln$") ~= nil
+        end)
+        return root or vim.fn.getcwd()
+      end
+
+      local function build_and_pick_dll()
+        local root = project_root()
+        vim.notify("Building in " .. root .. " ...", vim.log.levels.INFO)
+
+        local res = vim.system({ "dotnet", "build", "-c", "Debug" }, { cwd = root, text = true }):wait()
+        if res.code ~= 0 then
+          vim.notify((res.stdout or "") .. (res.stderr or ""), vim.log.levels.ERROR)
+          return dap.ABORT
+        end
+
+        local dlls = vim.fn.glob(root .. "/bin/Debug/**/*.dll", false, true)
+
+        -- Prefer the dll named after the .csproj in the root
+        local csproj = vim.fn.glob(root .. "/*.csproj", false, true)[1]
+        if csproj then
+          local name = vim.fn.fnamemodify(csproj, ":t:r") .. ".dll"
+          local matches = vim.tbl_filter(function(p)
+            return vim.fn.fnamemodify(p, ":t") == name
+          end, dlls)
+          if #matches == 1 then
+            return matches[1]
+          end
+        end
+
+        -- Ambiguous or not found: ask
+        return vim.fn.input("Path to dll: ", root .. "/bin/Debug/", "file")
+      end
+
+      -- Path to your Godot Mono/.NET executable.
+      -- Set $GODOT in your shell, or edit the fallback below.
+      local godot_bin = vim.env.GODOT
+      if not godot_bin or godot_bin == "" then
+        godot_bin = vim.fn.exepath("godot")
+      end
+      if godot_bin == "" then
+        godot_bin = "/path/to/Godot_v4.x_mono" -- <-- change me
+      end
 
       dap.configurations.cs = {
         {
           type = "coreclr",
           name = "Launch .NET",
           request = "launch",
-          program = function()
-            return vim.fn.input("Path to dll: ", vim.fn.getcwd() .. "/bin/Debug/", "file")
-          end,
+          program = build_and_pick_dll,
+          cwd = project_root,
+          stopAtEntry = false,
+        },
+        {
+          type = "coreclr",
+          name = "Attach to process",
+          request = "attach",
+          processId = require("dap.utils").pick_process,
+        },
+        {
+          type = "coreclr",
+          name = "Launch Godot",
+          request = "launch",
+          program = godot_bin,
+          args = { "--path", "${workspaceFolder}" },
+          cwd = "${workspaceFolder}",
+          stopAtEntry = false,
         },
         {
           type = "coreclr",
@@ -93,7 +166,9 @@ return {
           request = "attach",
           processId = require("dap.utils").pick_process,
         },
-      } ------------------------------------------------------------------------
+      }
+
+      ------------------------------------------------------------------------
       -- Elixir
       ------------------------------------------------------------------------
 
@@ -155,9 +230,14 @@ return {
         desc = "DAP: Run Last",
       })
 
-      vim.keymap.set("n", "<leader>dq", dap.terminate, {
-        desc = "DAP: Terminate",
-      })
+      vim.keymap.set("n", "<leader>dq", function()
+        local dap = require("dap")
+        -- Force the adapter to kill the application process
+        dap.disconnect({ terminateDebuggee = true })
+        dap.terminate()
+        dap.close()
+        print("Debugger terminated and process killed")
+      end, { desc = "DAP: Terminate and Kill" })
 
       vim.keymap.set("n", "<leader>dC", dap.run_to_cursor, {
         desc = "DAP: Run to Cursor",
@@ -176,6 +256,7 @@ return {
         desc = "DAP: Step Out",
       })
 
+      -- Note: netcoredbg does not support step back (works for some other adapters)
       vim.keymap.set("n", "<leader>dp", dap.step_back, {
         desc = "DAP: Step Back",
       })
@@ -196,9 +277,13 @@ return {
       })
 
       -- Widgets
-      vim.keymap.set("n", "<leader>dh", widgets.hover, {
-        desc = "DAP: Hover Variable",
-      })
+      vim.keymap.set({ "n", "v" }, "K", function()
+        if require("dap").session() then
+          dapui.eval(nil, { width = 60, height = 15, enter = false })
+        else
+          vim.lsp.buf.hover()
+        end
+      end, { desc = "Hover (DAP value when debugging, LSP otherwise)" })
 
       vim.keymap.set("n", "<leader>df", widgets.centered_float, {
         desc = "DAP: Floating Scopes",

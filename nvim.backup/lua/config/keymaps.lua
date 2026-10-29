@@ -64,40 +64,6 @@ vim.keymap.set("n", "<leader>ft", "<Nop>", { desc = "Disabled LazyVim Terminal k
 -- Disable LazyVim leader-c keymaps
 vim.keymap.set("n", "<leader>c", "<Nop>")
 
--- Change to Terminal from buffer (<leader>ct)
-vim.keymap.set("n", "<leader>ct", function()
-  -- Loop through all windows in the current tab to find a terminal
-  for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-    local buf = vim.api.nvim_win_get_buf(win)
-    local ft = vim.bo[buf].filetype
-    if ft == "toggleterm" then
-      vim.api.nvim_set_current_win(win) -- Move cursor to terminal
-      vim.api.nvim_feedkeys("i", "n", false) -- Enter terminal mode
-      return
-    end
-  end
-  vim.notify("No terminal found!", vim.log.levels.WARN)
-end, { desc = "Change to terminal" })
-
--- Change to Buffer from terminal (Ctrl+b)
-vim.keymap.set("t", "<C-b>", function()
-  -- Exit terminal mode first
-  vim.api.nvim_feedkeys(vim.api.nvim_replace_termcodes("<C-\\><C-n>", true, false, true), "n", true)
-  -- Find first real buffer (not terminal, not neo-tree, not empty)
-  vim.schedule(function()
-    for _, win in ipairs(vim.api.nvim_tabpage_list_wins(0)) do
-      local buf = vim.api.nvim_win_get_buf(win)
-      local ft = vim.bo[buf].filetype
-      local buf_name = vim.api.nvim_buf_get_name(buf)
-      if ft ~= "toggleterm" and ft ~= "neo-tree" and buf_name ~= "" then
-        vim.api.nvim_set_current_win(win)
-        return
-      end
-    end
-    vim.notify("No buffer found!", vim.log.levels.WARN)
-  end)
-end, { desc = "Change to buffer" })
-
 -- Create tmux pane at bottom (25% height) (<leader>tv) - TMUX
 vim.keymap.set("n", "<leader>tv", function()
   local current_dir = vim.fn.expand("%:p:h")
@@ -138,14 +104,6 @@ end, { desc = "Split horizontal (switch buffer)" })
 
 -- Close current split
 vim.keymap.set("n", "<leader>sc", "<cmd>close<cr>", { desc = "Close split" })
-
--- Obsidian
-
-vim.keymap.set("n", "<leader>o", "<Nop>")
-vim.keymap.set("n", "<leader>on", ":ObsidianNew<CR>")
-vim.keymap.set("n", "<leader>ot", ":ObsidianToday<CR>")
-vim.keymap.set("n", "<leader>os", ":ObsidianSearch<CR>")
-vim.keymap.set("n", "<leader>ol", ":ObsidianLinks<CR>")
 
 -- Markdown Preview
 vim.keymap.set("n", "<leader>mp", ":MarkdownPreview<CR>")
