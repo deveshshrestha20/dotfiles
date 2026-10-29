@@ -1,18 +1,34 @@
 return {
   {
     "mfussenegger/nvim-dap",
+    lazy = false, -- Forces DAP to load on startup so your keymaps register immediately
     dependencies = {
       "leoluz/nvim-dap-go",
       "rcarriga/nvim-dap-ui",
       "theHamsta/nvim-dap-virtual-text",
       "nvim-neotest/nvim-nio",
       "mason-org/mason.nvim",
+      "nvim-telescope/telescope.nvim",
+
+      -- Added dependencies for new features
+      "Weissle/persistent-breakpoints.nvim",
+      "nvim-telescope/telescope-dap.nvim",
     },
 
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
       local widgets = require("dap.ui.widgets")
+
+      ------------------------------------------------------------------------
+      -- Setup Added Plugins
+      ------------------------------------------------------------------------
+
+      require("persistent-breakpoints").setup({
+        load_breakpoints_event = { "BufReadPost" },
+      })
+
+      require("telescope").load_extension("dap")
 
       ------------------------------------------------------------------------
       -- Plugins
@@ -197,21 +213,23 @@ return {
       -- Keymaps
       ------------------------------------------------------------------------
 
-      -- Breakpoints
-      vim.keymap.set("n", "<leader>db", dap.toggle_breakpoint, {
+      -- Breakpoints (Routed through Persistent Breakpoints API)
+      local pb_api = require("persistent-breakpoints.api")
+
+      vim.keymap.set("n", "<leader>db", pb_api.toggle_breakpoint, {
         desc = "DAP: Toggle Breakpoint",
       })
 
-      vim.keymap.set("n", "<leader>dB", function()
-        dap.set_breakpoint(vim.fn.input("Breakpoint condition: "))
-      end, {
+      vim.keymap.set("n", "<leader>dB", pb_api.set_conditional_breakpoint, {
         desc = "DAP: Conditional Breakpoint",
       })
 
-      vim.keymap.set("n", "<leader>dg", function()
-        dap.set_breakpoint(nil, nil, vim.fn.input("Log point: "))
-      end, {
+      vim.keymap.set("n", "<leader>dg", pb_api.set_log_point, {
         desc = "DAP: Log Point",
+      })
+
+      vim.keymap.set("n", "<leader>dX", pb_api.clear_all_breakpoints, {
+        desc = "DAP: Clear All Breakpoints",
       })
 
       -- Execution
@@ -220,11 +238,12 @@ return {
       })
 
       vim.keymap.set("n", "<leader>dr", function()
-        dap.terminate()
-        dap.run_last()
-      end, {
-        desc = "DAP: Restart",
-      })
+        local dap = require("dap")
+        dap.disconnect({ terminateDebuggee = true })
+        vim.defer_fn(function()
+          dap.run_last()
+        end, 500) -- Half-second delay to let the OS free port 5000
+      end, { desc = "DAP: Visual Studio like Restart" })
 
       vim.keymap.set("n", "<leader>dl", dap.run_last, {
         desc = "DAP: Run Last",
@@ -287,6 +306,19 @@ return {
 
       vim.keymap.set("n", "<leader>df", widgets.centered_float, {
         desc = "DAP: Floating Scopes",
+      })
+
+      -- Telescope DAP Integration Keymaps
+      vim.keymap.set("n", "<leader>dv", "<cmd>Telescope dap variables<CR>", {
+        desc = "DAP: Search Variables (Telescope)",
+      })
+
+      vim.keymap.set("n", "<leader>dF", "<cmd>Telescope dap frames<CR>", {
+        desc = "DAP: Search Call Frames (Telescope)",
+      })
+
+      vim.keymap.set("n", "<leader>dlist", "<cmd>Telescope dap list_breakpoints<CR>", {
+        desc = "DAP: List Breakpoints (Telescope)",
       })
 
       ------------------------------------------------------------------------

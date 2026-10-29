@@ -91,6 +91,7 @@ return {
       },
 
       "nvim-telescope/telescope-frecency.nvim",
+      "nvim-telescope/telescope-dap.nvim", -- Added DAP integration
     },
 
     keys = {
@@ -242,6 +243,25 @@ return {
           require("telescope.builtin").help_tags()
         end,
         desc = "Find help",
+      },
+
+      -- ============================================================
+      -- DEBUGGING (DAP) PICKERS
+      -- ============================================================
+      {
+        "<leader>dv",
+        "<cmd>Telescope dap variables<CR>",
+        desc = "Search Variables (Telescope)",
+      },
+      {
+        "<leader>dF",
+        "<cmd>Telescope dap frames<CR>",
+        desc = "Search Call Frames (Telescope)",
+      },
+      {
+        "<leader>dlist",
+        "<cmd>Telescope dap list_breakpoints<CR>",
+        desc = "List Breakpoints (Telescope)",
       },
     },
 
@@ -468,6 +488,7 @@ return {
 
       telescope.load_extension("fzf")
       telescope.load_extension("frecency")
+      telescope.load_extension("dap") -- Loaded DAP extension
     end,
   },
 }
